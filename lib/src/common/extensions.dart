@@ -23,20 +23,19 @@ extension IntToByteExtension on int? {
 
 extension JsonExtension on String? {
   String get prettify {
-    if (this != null) {
-      try {
-        var decoded = json.decode(this!);
-        var encoder = const JsonEncoder.withIndent('  ');
-        var prettyJson = encoder.convert(decoded);
-        return prettyJson;
-      } catch (e) {
-        return 'N/A-Cannot Parse';
-      }
+    if (this == null || this!.isEmpty) return this ?? '';
+    try {
+      var decoded = json.decode(this!);
+      var encoder = const JsonEncoder.withIndent('  ');
+      var prettyJson = encoder.convert(decoded);
+      return prettyJson;
+    } catch (e) {
+      return this!;
     }
-    return 'N/A';
   }
 
   bool get isJson {
+    if (this == null || this!.isEmpty) return false;
     try {
       json.decode(this!);
       return true;

@@ -18,7 +18,7 @@ class SearchAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.onSearch,
     required this.controller,
     required this.onNextSearch,
-    required this.onPreviousSearch, 
+    required this.onPreviousSearch,
     required this.tabController,
   })  : preferredSize =
             const Size.fromHeight(kToolbarHeight + kTextTabBarHeight + 16),

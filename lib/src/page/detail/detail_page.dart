@@ -20,7 +20,8 @@ class DetailPage extends StatefulWidget {
   State<DetailPage> createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateMixin {
+class _DetailPageState extends State<DetailPage>
+    with SingleTickerProviderStateMixin {
   late SearchHighlightWidget _highlightTextController;
   late TextEditingController _searchController;
   late ScrollController _scrollController;
@@ -53,14 +54,19 @@ class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateM
     _tabController = TabController(length: 4, vsync: this);
 
     _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
       if (_tabController.index == 2) {
-        setState(() {
-          _showSearch = true;
-        });
+        if (!_showSearch) {
+          setState(() {
+            _showSearch = true;
+          });
+        }
       } else {
-        setState(() {
-          _showSearch = false;
-        });
+        if (_showSearch) {
+          setState(() {
+            _showSearch = false;
+          });
+        }
       }
     });
   }
@@ -69,7 +75,7 @@ class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateM
     if (_debounceTimer?.isActive ?? false) {
       _debounceTimer?.cancel();
     }
-    _debounceTimer = Timer(const Duration(milliseconds: 0), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
       _highlightTextController.highlightSearchTerm(query);
     });
   }
@@ -103,7 +109,7 @@ class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateM
                     text: Copy.getCurlCommand(widget.data),
                     message: 'Curl command copied to clipboard',
                   );
-                 },
+                },
                 child: Icon(
                   Icons.code,
                   color: AppColor.white,
@@ -120,7 +126,7 @@ class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateM
                     text: Copy.getActivity(widget.data),
                     message: 'Activity copied to clipboard',
                   );
-                 },
+                },
                 child: Icon(
                   Icons.copy,
                   color: AppColor.white,
@@ -148,15 +154,17 @@ class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateM
   }
 
   Widget _buildBody(BuildContext context) {
-    return TabBarView(
-      physics: NeverScrollableScrollPhysics(),
-      controller: _tabController,
-      children: [
-        _overviewWidget(widget.data),
-        _requestWidget(widget.data),
-        _responseWidget(widget.data),
-        _errorWidget(widget.data),
-      ],
+    return SafeArea(
+      child: TabBarView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: _tabController,
+        children: [
+          _overviewWidget(widget.data),
+          _requestWidget(widget.data),
+          _responseWidget(widget.data),
+          _errorWidget(widget.data),
+        ],
+      ),
     );
   }
 
@@ -215,45 +223,58 @@ class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateM
 
   Widget _responseWidget(HttpActivity data) {
     var contentTypeList = data.response?.headers?["content-type"];
-    final isImage = contentTypeList != null && contentTypeList.any((element) => element.contains('image'));
+    final isImage = contentTypeList != null &&
+        contentTypeList.any((element) => element.contains('image'));
 
     return SingleChildScrollView(
       controller: _highlightTextController.scrollController,
       physics: const BouncingScrollPhysics(),
       child: ValueListenableBuilder<List<HighlightSpanWidget>>(
-        valueListenable: _highlightTextController.highlightsNotifier,
-        builder: (context, highlights, child) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Column(
-              children: [
-                ItemRow(name: 'Received :', value: data.response?.time.toString()),
-                ItemRow(name: 'Status Code :', value: data.response?.status.toString()),
-                ItemRow(name: 'Bytes Received :', value: Helper.formatBytes(data.response?.size ?? 0)),
-                ItemRow(name: 'Headers', value: Helper.encodeRawJson(data.response?.headers), useHeaderFormat: true),
-                if (!isImage) ItemColumn(
-                  name: 'Body :',
-                  value: data.response?.body,
-                  child: TextField(
-                    readOnly: true,
-                    controller: _highlightTextController,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[100],
+          valueListenable: _highlightTextController.highlightsNotifier,
+          builder: (context, highlights, child) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Column(
+                children: [
+                  ItemRow(
+                      name: 'Received :',
+                      value: data.response?.time.toString()),
+                  ItemRow(
+                      name: 'Status Code :',
+                      value: data.response?.status.toString()),
+                  ItemRow(
+                      name: 'Bytes Received :',
+                      value: Helper.formatBytes(data.response?.size ?? 0)),
+                  ItemRow(
+                      name: 'Headers',
+                      value: Helper.encodeRawJson(data.response?.headers),
+                      useHeaderFormat: true),
+                  if (!isImage)
+                    ItemColumn(
+                      name: 'Body :',
+                      value: data.response?.body,
+                      child: TextField(
+                        readOnly: true,
+                        controller: _highlightTextController,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                        ),
+                        style: TextStyle(fontSize: 14),
+                      ),
                     ),
-                    style: TextStyle(fontSize: 14),
-                    onChanged: (value) {
-                      _onSearchChanged(_searchController.text.trim());
-                    },
-                  ),
-                ),
-                if (isImage) ItemColumn(name: 'Body :', value: '', isImage: isImage, showCopyButton: false,),
-              ],
-            ),
-          );
-        }
-      ),
+                  if (isImage)
+                    ItemColumn(
+                      name: 'Body :',
+                      value: '',
+                      isImage: isImage,
+                      showCopyButton: false,
+                    ),
+                ],
+              ),
+            );
+          }),
     );
   }
 
@@ -268,12 +289,14 @@ class _DetailPageState extends State<DetailPage> with SingleTickerProviderStateM
             children: [
               Icon(Icons.warning, color: AppColor.primary, size: 60),
               SizedBox(height: 14),
-              Text('No error found', style: TextStyle(color: AppColor.primary, fontSize: 20)),
+              Text('No error found',
+                  style: TextStyle(color: AppColor.primary, fontSize: 20)),
             ],
           ),
         ),
       );
-    };
+    }
+    ;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

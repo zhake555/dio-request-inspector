@@ -6,7 +6,6 @@ import 'package:dio_request_inspector/src/page/dashboard/widget/password_protect
 import 'package:dio_request_inspector/src/page/detail/detail_page.dart';
 import 'package:dio_request_inspector/src/page/resources/app_color.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 
 class DashboardPage extends StatefulWidget {
   final String password;
@@ -14,10 +13,10 @@ class DashboardPage extends StatefulWidget {
   final bool showSummary;
 
   const DashboardPage({
-    Key? key, 
-    this.password = '', 
-    required this.storage, 
-    required this.showSummary, 
+    Key? key,
+    this.password = '',
+    required this.storage,
+    required this.showSummary,
   }) : super(key: key);
 
   @override
@@ -28,21 +27,11 @@ class _DashboardPageState extends State<DashboardPage> {
   bool isSearch = false;
   TextEditingController searchController = TextEditingController();
   FocusNode focusNode = FocusNode();
-  List<HttpActivity> filteredActivities = [];
-  List<HttpActivity> allActivities = [];
-  StreamSubscription<List<HttpActivity>>? activitiesSubscription;
   SortActivity currentSort = SortActivity.byTime;
 
   @override
   void initState() {
     super.initState();
-    activitiesSubscription = widget.storage.activities.listen((activities) {
-      setState(() {
-        allActivities = List.of(activities);
-        filteredActivities = List.of(activities);
-        sortActivities(filteredActivities, currentSort);
-      });
-    });
   }
 
   @override
@@ -57,7 +46,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void dispose() {
-    activitiesSubscription?.cancel();
     searchController.dispose();
     focusNode.dispose();
     super.dispose();
@@ -69,34 +57,24 @@ class _DashboardPageState extends State<DashboardPage> {
       if (!isSearch) {
         searchController.clear();
         focusNode.unfocus();
-        filteredActivities = allActivities;
       }
     });
   }
 
   void search(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        filteredActivities = allActivities;
-      } else {
-        filteredActivities = allActivities
-            .where((activity) =>
-                activity.toString().toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
-    });
+    setState(() {});
   }
 
   void sortAllResponses(SortActivity sortType) {
     setState(() {
       currentSort = sortType;
-      sortActivities(filteredActivities, sortType);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF2F2F2),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColor.red,
         shape: const CircleBorder(),
@@ -175,23 +153,47 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
         backgroundColor: Colors.white,
       ),
-      body: Container(
-        color: Colors.white,
-        child: Center(
-          child: StreamBuilder<List<HttpActivity>>(
-            stream: widget.storage.activities,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const CircularProgressIndicator();
-              }
+      body: Center(
+        child: StreamBuilder<List<HttpActivity>>(
+          stream: widget.storage.activities,
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const CircularProgressIndicator();
+            }
 
-              if (filteredActivities.isEmpty) {
-                return const Text('No data');
-              }
+            List<HttpActivity> displayedActivities = snapshot.data ?? [];
 
-              return _buildBody(filteredActivities);
-            },
-          ),
+            if (isSearch && searchController.text.isNotEmpty) {
+              final query = searchController.text.toLowerCase();
+              displayedActivities = displayedActivities
+                  .where((activity) =>
+                      activity.toString().toLowerCase().contains(query))
+                  .toList();
+            } else {
+              displayedActivities = List.from(displayedActivities);
+            }
+
+            switch (currentSort) {
+              case SortActivity.byTime:
+                displayedActivities
+                    .sort((a, b) => b.createdTime.compareTo(a.createdTime));
+                break;
+              case SortActivity.byMethod:
+                displayedActivities
+                    .sort((a, b) => a.method.compareTo(b.method));
+                break;
+              case SortActivity.byStatus:
+                displayedActivities.sort((a, b) => (a.response?.status ?? 0)
+                    .compareTo(b.response?.status ?? 0));
+                break;
+            }
+
+            if (displayedActivities.isEmpty) {
+              return const Text('No data');
+            }
+
+            return _buildBody(displayedActivities);
+          },
         ),
       ),
     );
@@ -210,129 +212,30 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildBody(List<HttpActivity> filteredActivities) {
-    return Column(
-      children: [
-        Visibility(
-          visible: widget.showSummary,
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            width: double.infinity,
-            child: Card(
-              surfaceTintColor: Colors.transparent,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-              color: Colors.white,
-              child: ListTileTheme(
-                contentPadding: EdgeInsets.all(0),
-                dense: true,
-                horizontalTitleGap: 0.0,
-                minLeadingWidth: 0,
-                child: Theme(
-                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-                    title: const Text('Total'),
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(
-                            children: [
-                              Text('GET',
-                                  style: TextStyle(
-                                      color: AppColor.primary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 5),
-                              Text(_getTotalRequest(filteredActivities, 'get')),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text('POST',
-                                  style: TextStyle(
-                                      color: AppColor.primary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 5),
-                              Text(_getTotalRequest(filteredActivities, 'post')),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text('PUT',
-                                  style: TextStyle(
-                                      color: AppColor.primary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 5),
-                              Text(_getTotalRequest(filteredActivities, 'put')),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text('PATCH',
-                                  style: TextStyle(
-                                      color: AppColor.primary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 5),
-                              Text(_getTotalRequest(filteredActivities, 'patch')),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              Text('DELETE',
-                                  style: TextStyle(
-                                      color: AppColor.primary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold)),
-                              SizedBox(height: 5),
-                              Text(_getTotalRequest(filteredActivities, 'delete')),
-                            ],
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+    return ListView.separated(
+      padding: const EdgeInsets.all(12),
+      physics: const BouncingScrollPhysics(),
+      itemCount: filteredActivities.length,
+      separatorBuilder: (context, index) {
+        return const SizedBox(height: 8);
+      },
+      itemBuilder: (context, index) {
+        var data = filteredActivities[index];
+
+        return InkWell(
+          onTap: () {
+            Navigator.push<void>(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailPage(
+                  data: data,
                 ),
               ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            itemCount: filteredActivities.length,
-            itemBuilder: (context, index) {
-              var data = filteredActivities[index];
-
-              return InkWell(
-                onTap: () {
-                  Navigator.push<void>(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetailPage(
-                        data: data,
-                      ),
-                    ),
-                  );
-                },
-                child: ItemResponseWidget(data: data),
-              );
-            },
-          ),
-        ),
-      ],
+            );
+          },
+          child: ItemResponseWidget(data: data),
+        );
+      },
     );
-  }
-
-  String _getTotalRequest(List<HttpActivity> getAllResponses, String method) {
-    return getAllResponses
-        .where((e) => e.method.toLowerCase() == method)
-        .length
-        .toString();
   }
 }

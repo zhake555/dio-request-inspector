@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dio_request_inspector/src/model/http_activity.dart';
 import 'package:dio_request_inspector/src/model/http_error.dart';
 import 'package:dio_request_inspector/src/model/http_response.dart';
@@ -6,17 +8,21 @@ import 'package:rxdart/rxdart.dart';
 class HttpActivityStorage {
   static const int maxActivities = 500;
 
+  final LinkedHashMap<int, HttpActivity> _activityMap =
+      LinkedHashMap<int, HttpActivity>();
+
   final BehaviorSubject<List<HttpActivity>> _activities =
       BehaviorSubject.seeded([]);
 
   Stream<List<HttpActivity>> get activities => _activities.stream;
 
   void addActivity(HttpActivity activity) {
-    final list = [..._activities.value, activity];
-    if (list.length > maxActivities) {
-      list.removeRange(0, list.length - maxActivities);
+    _activityMap[activity.id] = activity;
+    if (_activityMap.length > maxActivities) {
+      final firstKey = _activityMap.keys.first;
+      _activityMap.remove(firstKey);
     }
-    _activities.add(list);
+    _emitUpdate();
   }
 
   void addResponse(HttpResponse response, int hashCode) {
@@ -32,13 +38,11 @@ class HttpActivityStorage {
       ..duration = response.time.millisecondsSinceEpoch -
           (selectedCall.request?.time.millisecondsSinceEpoch ?? 0);
 
-    _activities.add([..._activities.value]);
+    _emitUpdate();
   }
 
   HttpActivity? whereId(int hashCode) {
-    return _activities.value
-        .where((element) => element.id == hashCode)
-        .firstOrNull;
+    return _activityMap[hashCode];
   }
 
   void addError(HttpError error, int hashCode) {
@@ -50,10 +54,15 @@ class HttpActivityStorage {
 
     activity.error = error;
     activity.loading = false;
-    _activities.add([..._activities.value]);
+    _emitUpdate();
   }
 
   void clear() {
-    _activities.add([]);
+    _activityMap.clear();
+    _emitUpdate();
+  }
+
+  void _emitUpdate() {
+    _activities.add(_activityMap.values.toList());
   }
 }

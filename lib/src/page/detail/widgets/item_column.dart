@@ -60,29 +60,27 @@ class ItemColumn extends StatelessWidget {
               child: Placeholder(),
             ),
           ),
-
         if (!isImage)
           if (child != null) child!,
-
-          Visibility(
-            visible: child == null,
-            child: SizedBox(
-              width: double.infinity,
-              child: Card(
-                elevation: 0,
-                color: Colors.grey[100],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    value!.isJson ? value!.prettify : value!,
-                  ),
+        Visibility(
+          visible: child == null,
+          child: SizedBox(
+            width: double.infinity,
+            child: Card(
+              elevation: 0,
+              color: Colors.grey[100],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  value!.isJson ? value!.prettify : value!,
                 ),
               ),
             ),
           ),
+        ),
       ],
     );
   }
