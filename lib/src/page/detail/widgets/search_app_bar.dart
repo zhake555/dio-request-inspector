@@ -50,6 +50,7 @@ class _SearchAppBarState extends State<SearchAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      iconTheme: IconThemeData(color: AppColor.primary),
       title: _isSearching && widget.showSearch
           ? TextField(
               controller: _searchController,
@@ -68,16 +69,6 @@ class _SearchAppBarState extends State<SearchAppBar> {
             ),
       elevation: 3,
       surfaceTintColor: AppColor.white,
-      // leading: IconButton(
-      //   onPressed: () {
-      //     if (_isSearching) {
-      //       _toggleSearch();
-      //     } else {
-      //       Navigator.pop(context);
-      //     }
-      //   },
-      //   icon: Icon(Icons.arrow_back, color: AppColor.primary),
-      // ),
       actions: _isSearching && widget.showSearch
           ? [
               IconButton(

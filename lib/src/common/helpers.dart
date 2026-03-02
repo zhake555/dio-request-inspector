@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +16,10 @@ class Helper {
   static const String _seconds = "s";
   static const String _minutes = "min";
 
-  static void copyToClipboard({String text = '', BuildContext? context, String message = 'Copied to clipboard'}) {
+  static void copyToClipboard(
+      {String text = '',
+      BuildContext? context,
+      String message = 'Copied to clipboard'}) {
     Clipboard.setData(ClipboardData(text: text)).then((_) {
       ScaffoldMessenger.of(context!)
           .showSnackBar(SnackBar(content: Text(message)));
@@ -49,11 +53,23 @@ class Helper {
         '${duration.inMilliseconds.remainder(1000)} $_milliseconds';
   }
 
+  static bool isBinaryData(dynamic data) {
+    if (data is Uint8List) return true;
+    if (data is List && data.isNotEmpty && data.first is int) return true;
+    return false;
+  }
+
   static String? encodeRawJson(dynamic rawJson) {
     if (rawJson == null) {
       return null;
     }
-    
+
+    // Binary data (file bytes) — don't encode, just show a placeholder
+    if (isBinaryData(rawJson)) {
+      final int byteCount = (rawJson as List).length;
+      return '[File — $byteCount bytes]';
+    }
+
     if (rawJson is Map<String, dynamic>) {
       return (rawJson.isNotEmpty) ? json.encode(rawJson) : null;
     } else if (rawJson is List<dynamic>) {
@@ -72,5 +88,5 @@ class Helper {
     } catch (e) {
       return {};
     }
-  } 
+  }
 }

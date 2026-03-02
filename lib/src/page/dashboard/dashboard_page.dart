@@ -87,18 +87,8 @@ class _DashboardPageState extends State<DashboardPage> {
         },
       ),
       appBar: AppBar(
+        iconTheme: IconThemeData(color: AppColor.primary),
         surfaceTintColor: Colors.transparent,
-        // leading: IconButton(
-        //   color: AppColor.primary,
-        //   onPressed: () {
-        //     if (isSearch) {
-        //       toggleSearch();
-        //       return;
-        //     }
-        //     Navigator.pop(context);
-        //   },
-        //   icon: Icon(Icons.arrow_back, color: AppColor.primary),
-        // ),
         actions: [
           IconButton(
             onPressed: toggleSearch,

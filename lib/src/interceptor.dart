@@ -52,7 +52,9 @@ class Interceptor extends InterceptorsWrapper {
 
     uri.queryParameters.forEach((key, value) {
       if (mergedQueryParameters.containsKey(key)) {
-        mergedQueryParameters[key] = [mergedQueryParameters[key], value].expand((e) => e is List ? e : [e]).toList();
+        mergedQueryParameters[key] = [mergedQueryParameters[key], value]
+            .expand((e) => e is List ? e : [e])
+            .toList();
       } else {
         mergedQueryParameters[key] = value;
       }
@@ -61,11 +63,11 @@ class Interceptor extends InterceptorsWrapper {
     options.queryParameters.forEach((key, value) {
       if (!mergedQueryParameters.containsKey(key)) {
         mergedQueryParameters[key] = value;
-      } 
+      }
     });
-    
+
     final dynamic data = options.data;
-    
+
     if (data == null) {
       request..size = 0;
     } else {
@@ -80,7 +82,7 @@ class Interceptor extends InterceptorsWrapper {
           }
 
           request.formDataFields = fields;
-          request.body = jsonEncode(map); 
+          request.body = jsonEncode(map);
         }
 
         if (data.files.isNotEmpty == true) {
@@ -98,9 +100,16 @@ class Interceptor extends InterceptorsWrapper {
           request.formDataFiles = files;
         }
       } else {
-        request
-          ..size = utf8.encode(data.toString()).length
-          ..body = Helper.encodeRawJson(data);
+        if (Helper.isBinaryData(data)) {
+          final int byteCount = (data as List).length;
+          request
+            ..size = byteCount
+            ..body = '[File \u2014 $byteCount bytes]';
+        } else {
+          request
+            ..size = utf8.encode(data.toString()).length
+            ..body = Helper.encodeRawJson(data);
+        }
       }
     }
 
@@ -132,10 +141,15 @@ class Interceptor extends InterceptorsWrapper {
 
     if (response.data == null) {
       httpResponse..size = 0;
+    } else if (Helper.isBinaryData(response.data)) {
+      final int byteCount = (response.data as List).length;
+      httpResponse
+        ..body = '[File \u2014 $byteCount bytes]'
+        ..size = byteCount;
     } else {
       httpResponse
-      ..body = Helper.encodeRawJson(response.data)
-      ..size = utf8.encode(response.data.toString()).length;
+        ..body = Helper.encodeRawJson(response.data)
+        ..size = utf8.encode(response.data.toString()).length;
     }
 
     httpResponse.time = DateTime.now();
@@ -168,6 +182,11 @@ class Interceptor extends InterceptorsWrapper {
 
       if (error.response!.data == null) {
         httpResponse..size = 0;
+      } else if (Helper.isBinaryData(error.response!.data)) {
+        final int byteCount = (error.response!.data as List).length;
+        httpResponse
+          ..body = '[File \u2014 $byteCount bytes]'
+          ..size = byteCount;
       } else {
         httpResponse
           ..body = Helper.encodeRawJson(error.response?.data)
