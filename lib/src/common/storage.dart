@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
 import 'package:dio_request_inspector/src/model/http_error.dart';
 import 'package:dio_request_inspector/src/model/http_response.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter/foundation.dart';
 
 class HttpActivityStorage {
   static const int maxActivities = 500;
@@ -11,16 +11,15 @@ class HttpActivityStorage {
   final LinkedHashMap<int, HttpActivity> _activityMap =
       LinkedHashMap<int, HttpActivity>();
 
-  final BehaviorSubject<List<HttpActivity>> _activities =
-      BehaviorSubject.seeded([]);
+  final ValueNotifier<List<HttpActivity>> _activities =
+      ValueNotifier<List<HttpActivity>>([]);
 
-  Stream<List<HttpActivity>> get activities => _activities.stream;
+  ValueNotifier<List<HttpActivity>> get activitiesNotifier => _activities;
 
   void addActivity(HttpActivity activity) {
     _activityMap[activity.id] = activity;
     if (_activityMap.length > maxActivities) {
-      final firstKey = _activityMap.keys.first;
-      _activityMap.remove(firstKey);
+      _activityMap.remove(_activityMap.keys.first);
     }
     _emitUpdate();
   }
@@ -63,6 +62,6 @@ class HttpActivityStorage {
   }
 
   void _emitUpdate() {
-    _activities.add(_activityMap.values.toList());
+    _activities.value = _activityMap.values.toList();
   }
 }

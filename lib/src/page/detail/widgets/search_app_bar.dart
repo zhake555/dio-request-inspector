@@ -68,16 +68,16 @@ class _SearchAppBarState extends State<SearchAppBar> {
             ),
       elevation: 3,
       surfaceTintColor: AppColor.white,
-      leading: IconButton(
-        onPressed: () {
-          if (_isSearching) {
-            _toggleSearch();
-          } else {
-            Navigator.pop(context);
-          }
-        },
-        icon: Icon(Icons.arrow_back, color: AppColor.primary),
-      ),
+      // leading: IconButton(
+      //   onPressed: () {
+      //     if (_isSearching) {
+      //       _toggleSearch();
+      //     } else {
+      //       Navigator.pop(context);
+      //     }
+      //   },
+      //   icon: Icon(Icons.arrow_back, color: AppColor.primary),
+      // ),
       actions: _isSearching && widget.showSearch
           ? [
               IconButton(
@@ -90,6 +90,12 @@ class _SearchAppBarState extends State<SearchAppBar> {
                 icon: const Icon(Icons.arrow_downward, color: Colors.black),
                 onPressed: () {
                   widget.onNextSearch();
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.black),
+                onPressed: () {
+                  _toggleSearch();
                 },
               ),
             ]

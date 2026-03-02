@@ -1,6 +1,6 @@
 name: dio_request_inspector
 description: A HTTP inspector for Dio, which can intercept and log HTTP requests and responses.
-version: 3.2.1
+version: 3.2.3
 homepage: https://github.com/bayunugroho2022/dio-request-inspector
 
 environment:
@@ -11,7 +11,6 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.9.2
-  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_test:

@@ -88,17 +88,17 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       appBar: AppBar(
         surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          color: AppColor.primary,
-          onPressed: () {
-            if (isSearch) {
-              toggleSearch();
-              return;
-            }
-            Navigator.pop(context);
-          },
-          icon: Icon(Icons.arrow_back, color: AppColor.primary),
-        ),
+        // leading: IconButton(
+        //   color: AppColor.primary,
+        //   onPressed: () {
+        //     if (isSearch) {
+        //       toggleSearch();
+        //       return;
+        //     }
+        //     Navigator.pop(context);
+        //   },
+        //   icon: Icon(Icons.arrow_back, color: AppColor.primary),
+        // ),
         actions: [
           IconButton(
             onPressed: toggleSearch,
@@ -153,47 +153,45 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
         backgroundColor: Colors.white,
       ),
-      body: Center(
-        child: StreamBuilder<List<HttpActivity>>(
-          stream: widget.storage.activities,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const CircularProgressIndicator();
-            }
+      body: SafeArea(
+        child: Center(
+          child: ValueListenableBuilder<List<HttpActivity>>(
+            valueListenable: widget.storage.activitiesNotifier,
+            builder: (context, activities, _) {
+              List<HttpActivity> displayedActivities = activities;
 
-            List<HttpActivity> displayedActivities = snapshot.data ?? [];
+              if (isSearch && searchController.text.isNotEmpty) {
+                final query = searchController.text.toLowerCase();
+                displayedActivities = displayedActivities
+                    .where((activity) =>
+                        activity.toString().toLowerCase().contains(query))
+                    .toList();
+              } else {
+                displayedActivities = List.from(displayedActivities);
+              }
 
-            if (isSearch && searchController.text.isNotEmpty) {
-              final query = searchController.text.toLowerCase();
-              displayedActivities = displayedActivities
-                  .where((activity) =>
-                      activity.toString().toLowerCase().contains(query))
-                  .toList();
-            } else {
-              displayedActivities = List.from(displayedActivities);
-            }
+              switch (currentSort) {
+                case SortActivity.byTime:
+                  displayedActivities
+                      .sort((a, b) => b.createdTime.compareTo(a.createdTime));
+                  break;
+                case SortActivity.byMethod:
+                  displayedActivities
+                      .sort((a, b) => a.method.compareTo(b.method));
+                  break;
+                case SortActivity.byStatus:
+                  displayedActivities.sort((a, b) => (a.response?.status ?? 0)
+                      .compareTo(b.response?.status ?? 0));
+                  break;
+              }
 
-            switch (currentSort) {
-              case SortActivity.byTime:
-                displayedActivities
-                    .sort((a, b) => b.createdTime.compareTo(a.createdTime));
-                break;
-              case SortActivity.byMethod:
-                displayedActivities
-                    .sort((a, b) => a.method.compareTo(b.method));
-                break;
-              case SortActivity.byStatus:
-                displayedActivities.sort((a, b) => (a.response?.status ?? 0)
-                    .compareTo(b.response?.status ?? 0));
-                break;
-            }
+              if (displayedActivities.isEmpty) {
+                return const Text('No data');
+              }
 
-            if (displayedActivities.isEmpty) {
-              return const Text('No data');
-            }
-
-            return _buildBody(displayedActivities);
-          },
+              return _buildBody(displayedActivities);
+            },
+          ),
         ),
       ),
     );

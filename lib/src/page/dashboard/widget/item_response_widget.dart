@@ -24,7 +24,7 @@ class ItemResponseWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFEEEEEE)),
         boxShadow: [
           BoxShadow(
@@ -187,7 +187,7 @@ class ItemResponseWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         code.toString(),
@@ -221,7 +221,7 @@ class _MethodBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
@@ -257,7 +257,7 @@ class _PayloadRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             label,
@@ -273,8 +273,6 @@ class _PayloadRow extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 13,
               color: Color(0xFF616161),

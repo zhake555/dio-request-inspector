@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio_request_inspector/src/common/extensions.dart';
 import 'package:dio_request_inspector/src/common/helpers.dart';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
