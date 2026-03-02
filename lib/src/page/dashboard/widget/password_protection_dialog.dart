@@ -68,7 +68,7 @@ class PasswordProtectionDialog extends StatelessWidget {
                             }
                           },
                           validator: (value) {
-                            if (value!.isEmpty) {
+                            if (value == null || value.isEmpty) {
                               return 'Please enter your password';
                             }
 

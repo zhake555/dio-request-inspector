@@ -36,6 +36,11 @@ class ItemResponseWidget extends StatelessWidget {
   }
 
   Widget _buildRequestInfo() {
+    final queryParams = data.request?.queryParameters;
+    final hasQuery = queryParams != null && queryParams.isNotEmpty;
+    final body = data.request?.body;
+    final hasBody = body != null && body.isNotEmpty;
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0),
@@ -70,6 +75,14 @@ class ItemResponseWidget extends StatelessWidget {
               data.uri,
               style: TextStyle(fontSize: 12, color: AppColor.primary),
             ),
+            if (hasQuery) ...[
+              const SizedBox(height: 4),
+              _buildKeyValueRow('Query', _formatQueryParams(queryParams)),
+            ],
+            if (hasBody) ...[
+              const SizedBox(height: 4),
+              _buildKeyValueRow('Body', body),
+            ],
             const Divider(color: Colors.grey, endIndent: 12),
             Row(
               children: [
@@ -95,6 +108,30 @@ class ItemResponseWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildKeyValueRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label: ',
+          style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11, color: Colors.grey),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatQueryParams(Map<String, dynamic> params) {
+    return params.entries.map((e) => '${e.key}=${e.value}').join(', ');
   }
 
   Widget _buildStatusCode() {

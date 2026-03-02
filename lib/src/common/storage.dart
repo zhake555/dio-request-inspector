@@ -1,16 +1,22 @@
-import 'dart:async';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
 import 'package:dio_request_inspector/src/model/http_error.dart';
 import 'package:dio_request_inspector/src/model/http_response.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HttpActivityStorage {
-  BehaviorSubject<List<HttpActivity>> _activities = BehaviorSubject.seeded([]);
+  static const int maxActivities = 500;
+
+  final BehaviorSubject<List<HttpActivity>> _activities =
+      BehaviorSubject.seeded([]);
 
   Stream<List<HttpActivity>> get activities => _activities.stream;
 
-  FutureOr<void> addActivity(HttpActivity activity) {
-    _activities.value.add(activity);
+  void addActivity(HttpActivity activity) {
+    final list = [..._activities.value, activity];
+    if (list.length > maxActivities) {
+      list.removeRange(0, list.length - maxActivities);
+    }
+    _activities.add(list);
   }
 
   void addResponse(HttpResponse response, int hashCode) {
@@ -45,5 +51,9 @@ class HttpActivityStorage {
     activity.error = error;
     activity.loading = false;
     _activities.add([..._activities.value]);
+  }
+
+  void clear() {
+    _activities.add([]);
   }
 }

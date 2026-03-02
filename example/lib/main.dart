@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dio_request_inspector_setting.dart';
 
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(DioRequestInspectorMain(inspector: inspector, child: const MyApp()));
@@ -50,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dio Request Inspector Example'),
-        backgroundColor: Colors.purple.withOpacity(0.6),
+        backgroundColor: Colors.purple.withValues(alpha: 0.6),
       ),
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -64,9 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: _getRequest,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.withOpacity(0.6),
+                backgroundColor: Colors.purple.withValues(alpha: 0.6),
               ),
-              child: const Text("GET Request", style: TextStyle(color: Colors.white)),
+              child: const Text("GET Request",
+                  style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(
               height: 16,
@@ -74,9 +74,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: _getImageRequest,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.withOpacity(0.6),
+                backgroundColor: Colors.purple.withValues(alpha: 0.6),
               ),
-              child: const Text("GET Image Request", style: TextStyle(color: Colors.white)),
+              child: const Text("GET Image Request",
+                  style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(
               height: 16,
@@ -84,9 +85,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: _postRequest,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.withOpacity(0.6),
+                backgroundColor: Colors.purple.withValues(alpha: 0.6),
               ),
-              child: const Text("POST Request", style: TextStyle(color: Colors.white)),
+              child: const Text("POST Request",
+                  style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(
               height: 16,
@@ -97,9 +99,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: _errorRequest,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.withOpacity(0.6),
+                backgroundColor: Colors.purple.withValues(alpha: 0.6),
               ),
-              child: const Text("Error Request", style: TextStyle(color: Colors.white)),
+              child: const Text("Error Request",
+                  style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(
               height: 16,
@@ -107,9 +110,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: _openInspector,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.withOpacity(0.6),
+                backgroundColor: Colors.purple.withValues(alpha: 0.6),
               ),
-              child: const Text("Open Inspector", style: TextStyle(color: Colors.white)),
+              child: const Text("Open Inspector",
+                  style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(
               height: 16,
@@ -121,7 +125,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _getRequest() {
-    _dio.get<void>("https://63aea217ceaabafcf17f16b1.mockapi.io/get");
+    _dio.get<void>(
+      "https://63aea187ceaabafcf17f16b1.mockapi.io/get",
+      queryParameters: {"page": 1, "limit": 10, "search": "flutter"},
+    );
   }
 
   void _postRequest() {

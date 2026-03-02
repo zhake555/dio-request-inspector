@@ -38,11 +38,9 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     activitiesSubscription = widget.storage.activities.listen((activities) {
       setState(() {
-        allActivities = activities;
-        filteredActivities = activities;
-
-        filteredActivities
-            .sort((a, b) => b.createdTime.compareTo(a.createdTime));
+        allActivities = List.of(activities);
+        filteredActivities = List.of(activities);
+        sortActivities(filteredActivities, currentSort);
       });
     });
   }
@@ -92,19 +90,7 @@ class _DashboardPageState extends State<DashboardPage> {
   void sortAllResponses(SortActivity sortType) {
     setState(() {
       currentSort = sortType;
-      switch (sortType) {
-        case SortActivity.byTime:
-          filteredActivities
-              .sort((a, b) => b.createdTime.compareTo(a.createdTime));
-          break;
-        case SortActivity.byMethod:
-          filteredActivities.sort((a, b) => a.method.compareTo(b.method));
-          break;
-        case SortActivity.byStatus:
-          filteredActivities.sort((a, b) =>
-              a.response?.status?.compareTo(b.response?.status ?? 0) ?? 0);
-          break;
-      }
+      sortActivities(filteredActivities, sortType);
     });
   }
 
@@ -119,10 +105,7 @@ class _DashboardPageState extends State<DashboardPage> {
           color: AppColor.white,
         ),
         onPressed: () {
-          setState(() {
-            allActivities.clear();
-            filteredActivities.clear();
-          });
+          widget.storage.clear();
         },
       ),
       appBar: AppBar(

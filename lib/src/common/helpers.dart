@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class Helper {
-  static const int _kilobyteAsByte = 1000;
-  static const int _megabyteAsByte = 1000000;
+  static const int _kilobyteAsByte = 1024;
+  static const int _megabyteAsByte = 1024 * 1024;
   static const int _secondAsMillisecond = 1000;
   static const int _minuteAsMillisecond = 60000;
   static const String _bytes = "B";

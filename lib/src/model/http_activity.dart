@@ -1,12 +1,8 @@
-// ignore_for_file: must_be_immutable
-
-import 'package:equatable/equatable.dart';
-
 import 'http_error.dart';
 import 'http_request.dart';
 import 'http_response.dart';
 
-class HttpActivity with EquatableMixin {
+class HttpActivity {
   HttpActivity(this.id);
 
   final int id;
@@ -27,21 +23,4 @@ class HttpActivity with EquatableMixin {
   factory HttpActivity.empty() {
     return HttpActivity(0);
   }
-
-  @override
-  List<Object?> get props => [
-        id,
-        createdTime,
-        client,
-        loading,
-        secure,
-        method,
-        endpoint,
-        server,
-        uri,
-        duration,
-        request,
-        response,
-        error,
-      ];
 }

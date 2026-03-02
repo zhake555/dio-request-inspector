@@ -1,0 +1,19 @@
+name: dio_request_inspector_example
+description: Example app for dio_request_inspector package.
+version: 1.0.0+1
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.1.4 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.9.2
+  dio_request_inspector:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
