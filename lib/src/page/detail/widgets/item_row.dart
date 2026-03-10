@@ -27,7 +27,7 @@ class ItemRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const Text(
-          "Headers :",
+          "Headers:",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const Padding(
@@ -68,35 +68,25 @@ class ItemRow extends StatelessWidget {
   }
 
   Widget getListRow(String name, var value) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.only(left: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const CircleAvatar(
-            radius: 2.0,
-            backgroundColor: Colors.black,
-          ),
-          const Padding(
-            padding: EdgeInsets.only(left: 5),
-          ),
-          SelectableText(
-            '$name: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(left: 5),
-          ),
-          Flexible(
-            child: SelectableText(
-              value.toString(),
+      alignment: Alignment.centerLeft,
+      child: SelectableText.rich(
+        TextSpan(
+          children: [
+            const TextSpan(
+              text: '• ',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.only(bottom: 18),
-          )
-        ],
+            TextSpan(
+              text: '$name: ',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: value.toString(),
+            ),
+          ],
+        ),
       ),
     );
   }

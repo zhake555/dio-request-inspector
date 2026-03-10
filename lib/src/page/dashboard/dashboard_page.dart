@@ -5,6 +5,7 @@ import 'package:dio_request_inspector/src/page/dashboard/widget/item_response_wi
 import 'package:dio_request_inspector/src/page/dashboard/widget/password_protection_dialog.dart';
 import 'package:dio_request_inspector/src/page/detail/detail_page.dart';
 import 'package:dio_request_inspector/src/page/resources/app_color.dart';
+import 'package:dio_request_inspector/src/page/resources/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -73,114 +74,119 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColor.red,
-        shape: const CircleBorder(),
-        child: Icon(
-          Icons.delete,
-          color: AppColor.white,
+    return Theme(
+      data: AppTheme.theme,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF2F2F2),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: AppColor.red,
+          shape: const CircleBorder(),
+          child: Icon(
+            Icons.delete,
+            color: AppColor.white,
+          ),
+          onPressed: () {
+            widget.storage.clear();
+          },
         ),
-        onPressed: () {
-          widget.storage.clear();
-        },
-      ),
-      appBar: AppBar(
-        iconTheme: IconThemeData(color: AppColor.primary),
-        surfaceTintColor: Colors.transparent,
-        actions: [
-          IconButton(
-            onPressed: toggleSearch,
-            icon: Icon(
-              isSearch ? Icons.close : Icons.search,
-              color: AppColor.primary,
-            ),
-          ),
-          PopupMenuButton(
-            icon: Icon(
-              Icons.sort,
-              color: AppColor.primary,
-            ),
-            itemBuilder: (context) {
-              return [
-                const PopupMenuItem(
-                  value: SortActivity.byTime,
-                  child: Text('Time'),
-                ),
-                const PopupMenuItem(
-                  value: SortActivity.byMethod,
-                  child: Text('Method'),
-                ),
-                const PopupMenuItem(
-                  value: SortActivity.byStatus,
-                  child: Text('Status'),
-                ),
-              ];
-            },
-            onSelected: sortAllResponses,
-          ),
-        ],
-        title: !isSearch
-            ? Text('Http Activities', style: TextStyle(color: AppColor.primary))
-            : TextField(
-                style: TextStyle(color: AppColor.primary),
-                autofocus: true,
-                onChanged: search,
-                focusNode: focusNode,
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  focusColor: AppColor.primary,
-                  hintStyle: TextStyle(color: AppColor.primary),
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                  enabledBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
+        appBar: AppBar(
+          centerTitle: true,
+          iconTheme: IconThemeData(color: AppColor.primary),
+          surfaceTintColor: Colors.transparent,
+          actions: [
+            IconButton(
+              onPressed: toggleSearch,
+              icon: Icon(
+                isSearch ? Icons.close : Icons.search,
+                color: AppColor.primary,
               ),
-        backgroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ValueListenableBuilder<List<HttpActivity>>(
-            valueListenable: widget.storage.activitiesNotifier,
-            builder: (context, activities, _) {
-              List<HttpActivity> displayedActivities = activities;
+            ),
+            PopupMenuButton(
+              icon: Icon(
+                Icons.sort,
+                color: AppColor.primary,
+              ),
+              itemBuilder: (context) {
+                return [
+                  const PopupMenuItem(
+                    value: SortActivity.byTime,
+                    child: Text('Time'),
+                  ),
+                  const PopupMenuItem(
+                    value: SortActivity.byMethod,
+                    child: Text('Method'),
+                  ),
+                  const PopupMenuItem(
+                    value: SortActivity.byStatus,
+                    child: Text('Status'),
+                  ),
+                ];
+              },
+              onSelected: sortAllResponses,
+            ),
+          ],
+          title: !isSearch
+              ? Text('Http Activities',
+                  style: TextStyle(color: AppColor.primary))
+              : TextField(
+                  style: TextStyle(color: AppColor.primary),
+                  autofocus: true,
+                  onChanged: search,
+                  focusNode: focusNode,
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    focusColor: AppColor.primary,
+                    hintStyle: TextStyle(color: AppColor.primary),
+                    focusedBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    enabledBorder: const UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+          backgroundColor: Colors.white,
+        ),
+        body: SafeArea(
+          child: Center(
+            child: ValueListenableBuilder<List<HttpActivity>>(
+              valueListenable: widget.storage.activitiesNotifier,
+              builder: (context, activities, _) {
+                List<HttpActivity> displayedActivities = activities;
 
-              if (isSearch && searchController.text.isNotEmpty) {
-                final query = searchController.text.toLowerCase();
-                displayedActivities = displayedActivities
-                    .where((activity) =>
-                        activity.toString().toLowerCase().contains(query))
-                    .toList();
-              } else {
-                displayedActivities = List.from(displayedActivities);
-              }
+                if (isSearch && searchController.text.isNotEmpty) {
+                  final query = searchController.text.toLowerCase();
+                  displayedActivities = displayedActivities
+                      .where((activity) =>
+                          activity.toString().toLowerCase().contains(query))
+                      .toList();
+                } else {
+                  displayedActivities = List.from(displayedActivities);
+                }
 
-              switch (currentSort) {
-                case SortActivity.byTime:
-                  displayedActivities
-                      .sort((a, b) => b.createdTime.compareTo(a.createdTime));
-                  break;
-                case SortActivity.byMethod:
-                  displayedActivities
-                      .sort((a, b) => a.method.compareTo(b.method));
-                  break;
-                case SortActivity.byStatus:
-                  displayedActivities.sort((a, b) => (a.response?.status ?? 0)
-                      .compareTo(b.response?.status ?? 0));
-                  break;
-              }
+                switch (currentSort) {
+                  case SortActivity.byTime:
+                    displayedActivities
+                        .sort((a, b) => b.createdTime.compareTo(a.createdTime));
+                    break;
+                  case SortActivity.byMethod:
+                    displayedActivities
+                        .sort((a, b) => a.method.compareTo(b.method));
+                    break;
+                  case SortActivity.byStatus:
+                    displayedActivities.sort((a, b) => (a.response?.status ?? 0)
+                        .compareTo(b.response?.status ?? 0));
+                    break;
+                }
 
-              if (displayedActivities.isEmpty) {
-                return const Text('No data');
-              }
+                if (displayedActivities.isEmpty) {
+                  return const Text('No data');
+                }
 
-              return _buildBody(displayedActivities);
-            },
+                return _buildBody(displayedActivities);
+              },
+            ),
           ),
         ),
       ),

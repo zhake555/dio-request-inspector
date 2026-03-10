@@ -9,6 +9,7 @@ import 'package:dio_request_inspector/src/page/detail/widgets/item_row.dart';
 import 'package:dio_request_inspector/src/page/detail/widgets/search_app_bar.dart';
 import 'package:dio_request_inspector/src/page/detail/widgets/search_highlight.dart';
 import 'package:dio_request_inspector/src/page/resources/app_color.dart';
+import 'package:dio_request_inspector/src/page/resources/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class DetailPage extends StatefulWidget {
@@ -92,10 +93,12 @@ class _DetailPageState extends State<DetailPage>
 
   @override
   Widget build(BuildContext context) {
-    return SelectionArea(
-      child: DefaultTabController(
-        length: 4,
-        child: Scaffold(
+    return Theme(
+      data: AppTheme.theme,
+      child: SelectionArea(
+        child: DefaultTabController(
+          length: 4,
+          child: Scaffold(
           floatingActionButton: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -150,13 +153,13 @@ class _DetailPageState extends State<DetailPage>
           body: _buildBody(context),
         ),
       ),
+    ),
     );
   }
 
   Widget _buildBody(BuildContext context) {
     return SafeArea(
       child: TabBarView(
-        physics: NeverScrollableScrollPhysics(),
         controller: _tabController,
         children: [
           _overviewWidget(widget.data),
@@ -175,19 +178,19 @@ class _DetailPageState extends State<DetailPage>
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         child: Column(
           children: [
-            ItemRow(name: 'Method', value: data.method),
-            ItemRow(name: 'Server', value: data.server),
-            ItemRow(name: 'Endpoint', value: data.endpoint),
-            ItemRow(name: 'Time', value: data.request?.time.toString()),
-            ItemRow(name: 'Started', value: data.response?.time.toString()),
-            ItemRow(name: 'Duration', value: Helper.formatTime(data.duration)),
+            ItemRow(name: 'Method:', value: data.method),
+            ItemRow(name: 'Server:', value: data.server),
+            ItemRow(name: 'Endpoint:', value: data.endpoint),
+            ItemRow(name: 'Time:', value: data.request?.time.toString()),
+            ItemRow(name: 'Started:', value: data.response?.time.toString()),
+            ItemRow(name: 'Duration:', value: Helper.formatTime(data.duration)),
             ItemRow(
-                name: 'Bytes Sent',
+                name: 'Bytes Sent:',
                 value: Helper.formatBytes(data.request?.size ?? 0)),
             ItemRow(
-                name: 'Bytes Received',
+                name: 'Bytes Received:',
                 value: Helper.formatBytes(data.response?.size ?? 0)),
-            ItemRow(name: 'Secure', value: data.secure.toString()),
+            ItemRow(name: 'Secure:', value: data.secure.toString()),
           ],
         ),
       ),
@@ -201,18 +204,18 @@ class _DetailPageState extends State<DetailPage>
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         child: Column(
           children: [
-            ItemColumn(name: 'Started :', value: data.request?.time.toString()),
+            ItemColumn(name: 'Started:', value: data.request?.time.toString()),
             ItemColumn(
-                name: 'Bytes Sent :',
+                name: 'Bytes Sent:',
                 value: Helper.formatBytes(data.request?.size ?? 0)),
             ItemColumn(
-                name: 'Header :',
+                name: 'Header:',
                 value: Helper.encodeRawJson(data.request!.headers)),
             ItemColumn(
-                name: 'Query Parameters :',
+                name: 'Query Parameters:',
                 value: Helper.encodeRawJson(data.request?.queryParameters)),
             ItemColumn(
-                name: 'Body :',
+                name: 'Body:',
                 value: data.request?.body,
                 isImage: data.request?.contentType?.contains('image') ?? false),
           ],
@@ -237,13 +240,12 @@ class _DetailPageState extends State<DetailPage>
               child: Column(
                 children: [
                   ItemRow(
-                      name: 'Received :',
-                      value: data.response?.time.toString()),
+                      name: 'Received:', value: data.response?.time.toString()),
                   ItemRow(
-                      name: 'Status Code :',
+                      name: 'Status Code:',
                       value: data.response?.status.toString()),
                   ItemRow(
-                      name: 'Bytes Received :',
+                      name: 'Bytes Received:',
                       value: Helper.formatBytes(data.response?.size ?? 0)),
                   ItemRow(
                       name: 'Headers',
@@ -251,7 +253,7 @@ class _DetailPageState extends State<DetailPage>
                       useHeaderFormat: true),
                   if (!isImage)
                     ItemColumn(
-                      name: 'Body :',
+                      name: 'Body:',
                       value: data.response?.body,
                       child: TextField(
                         readOnly: true,
@@ -266,7 +268,7 @@ class _DetailPageState extends State<DetailPage>
                     ),
                   if (isImage)
                     ItemColumn(
-                      name: 'Body :',
+                      name: 'Body:',
                       value: '',
                       isImage: isImage,
                       showCopyButton: false,
@@ -304,7 +306,7 @@ class _DetailPageState extends State<DetailPage>
         physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            ItemColumn(name: 'Error :', value: data.error?.error.toString()),
+            ItemColumn(name: 'Error:', value: data.error?.error.toString()),
           ],
         ),
       ),

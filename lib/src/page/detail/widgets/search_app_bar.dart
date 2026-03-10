@@ -50,6 +50,7 @@ class _SearchAppBarState extends State<SearchAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      centerTitle: true,
       iconTheme: IconThemeData(color: AppColor.primary),
       title: _isSearching && widget.showSearch
           ? TextField(
@@ -99,24 +100,22 @@ class _SearchAppBarState extends State<SearchAppBar> {
             ],
       bottom: TabBar(
         controller: widget.tabController,
-        labelStyle: TextStyle(color: AppColor.primary),
-        indicatorColor: AppColor.primary,
         tabs: [
           Tab(
             text: 'Overview',
-            icon: Icon(Icons.info, color: AppColor.primary),
+            icon: Icon(Icons.info),
           ),
           Tab(
             text: 'Request',
-            icon: Icon(Icons.arrow_upward, color: AppColor.primary),
+            icon: Icon(Icons.arrow_upward),
           ),
           Tab(
             text: 'Response',
-            icon: Icon(Icons.arrow_downward, color: AppColor.primary),
+            icon: Icon(Icons.arrow_downward),
           ),
           Tab(
             text: 'Error',
-            icon: Icon(Icons.warning, color: AppColor.primary),
+            icon: Icon(Icons.warning),
           ),
         ],
       ),

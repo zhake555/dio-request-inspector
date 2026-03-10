@@ -1,6 +1,7 @@
 import 'package:dio_request_inspector/src/common/storage.dart';
 import 'package:dio_request_inspector/src/interceptor.dart';
 import 'package:dio_request_inspector/src/page/dashboard/dashboard_page.dart';
+import 'package:dio_request_inspector/src/page/resources/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class DioRequestInspector {
@@ -51,7 +52,14 @@ class DioRequestInspector {
   void navigateToInspector() {
     navigatorObserver.navigator?.push(
       MaterialPageRoute<dynamic>(
-        builder: (_) => DashboardPage(password: password ?? '', storage: _storage, showSummary: showSummary ?? true),
+        builder: (_) => Theme(
+          data: AppTheme.theme,
+          child: DashboardPage(
+            password: password ?? '',
+            storage: _storage,
+            showSummary: showSummary ?? true,
+          ),
+        ),
       ),
     );
   }
