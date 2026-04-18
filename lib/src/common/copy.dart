@@ -105,7 +105,7 @@ class Copy {
     activityDetails.writeln('Status Code: ${data.response?.status}');
     final responseHeaders = Helper.encodeRawJson(data.response?.headers);
     if (responseHeaders != null && responseHeaders.isNotEmpty) {
-      activityDetails.writeln('Headers: ${responseHeaders.prettify}');
+      activityDetails.writeln('Headers: $responseHeaders');
     }
     final responseBody = isImage ? 'Image Body' : data.response?.body;
     if (responseBody != null && responseBody.isNotEmpty) {
