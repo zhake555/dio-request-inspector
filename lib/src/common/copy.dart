@@ -85,20 +85,32 @@ class Copy {
     activityDetails.writeln('\n--- Request ---');
     final requestHeaders = Helper.decodeRawJson(data.request?.headers ?? '{}')
       ..removeWhere((key, _) => key.toLowerCase() == 'authorization');
-    activityDetails.writeln(
-        'Headers: ${Helper.encodeRawJson(requestHeaders).prettify}');
+    final headersEncoded = Helper.encodeRawJson(requestHeaders);
+    if (headersEncoded != null && headersEncoded.isNotEmpty) {
+      activityDetails.writeln('Headers: ${headersEncoded.prettify}');
+    }
 
-    activityDetails.writeln(
-        'Query Parameters: ${Helper.encodeRawJson(data.request?.queryParameters).prettify}');
+    final queryEncoded =
+        Helper.encodeRawJson(data.request?.queryParameters);
+    if (queryEncoded != null && queryEncoded.isNotEmpty) {
+      activityDetails.writeln('Query Parameters: ${queryEncoded.prettify}');
+    }
 
-    activityDetails.writeln('Body: ${data.request?.body.prettify}');
+    final requestBody = data.request?.body;
+    if (requestBody != null && requestBody.isNotEmpty) {
+      activityDetails.writeln('Body: ${requestBody.prettify}');
+    }
 
     activityDetails.writeln('\n--- Response ---');
     activityDetails.writeln('Status Code: ${data.response?.status}');
-    activityDetails
-        .writeln('Headers: ${Helper.encodeRawJson(data.response?.headers)}');
-    activityDetails.writeln(
-        'Body: ${isImage ? "Image Body" : data.response?.body.prettify}');
+    final responseHeaders = Helper.encodeRawJson(data.response?.headers);
+    if (responseHeaders != null && responseHeaders.isNotEmpty) {
+      activityDetails.writeln('Headers: $responseHeaders');
+    }
+    final responseBody = isImage ? 'Image Body' : data.response?.body;
+    if (responseBody != null && responseBody.isNotEmpty) {
+      activityDetails.writeln('Body: ${responseBody.prettify}');
+    }
 
     return activityDetails.toString();
   }
