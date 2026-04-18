@@ -55,8 +55,30 @@ class Helper {
 
   static bool isBinaryData(dynamic data) {
     if (data is Uint8List) return true;
-    if (data is List && data.isNotEmpty && data.first is int) return true;
+    if (data is List && data.isNotEmpty && data.first is int) {
+      // Try to decode as UTF-8 — if it succeeds, this is text (e.g. JSON error
+      // response returned as bytes because responseType was set to bytes).
+      try {
+        utf8.decode(data.cast<int>());
+        return false;
+      } catch (_) {
+        return true;
+      }
+    }
     return false;
+  }
+
+  /// Tries to decode a [List<int>] response as a UTF-8 string.
+  /// Returns null if decoding fails (truly binary data).
+  static String? tryDecodeBytes(dynamic data) {
+    if (data is List && data.isNotEmpty && data.first is int) {
+      try {
+        return utf8.decode(data.cast<int>());
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
   }
 
   static String? encodeRawJson(dynamic rawJson) {

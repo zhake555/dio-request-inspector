@@ -141,15 +141,23 @@ class Interceptor extends InterceptorsWrapper {
 
     if (response.data == null) {
       httpResponse..size = 0;
-    } else if (Helper.isBinaryData(response.data)) {
-      final int byteCount = (response.data as List).length;
-      httpResponse
-        ..body = '[File \u2014 $byteCount bytes]'
-        ..size = byteCount;
     } else {
-      httpResponse
-        ..body = Helper.encodeRawJson(response.data)
-        ..size = utf8.encode(response.data.toString()).length;
+      final decodedText = Helper.tryDecodeBytes(response.data);
+      if (decodedText != null) {
+        // Bytes that decoded as UTF-8 text (e.g. JSON error from a file endpoint)
+        httpResponse
+          ..body = Helper.encodeRawJson(decodedText)
+          ..size = utf8.encode(decodedText).length;
+      } else if (Helper.isBinaryData(response.data)) {
+        final int byteCount = (response.data as List).length;
+        httpResponse
+          ..body = '[File \u2014 $byteCount bytes]'
+          ..size = byteCount;
+      } else {
+        httpResponse
+          ..body = Helper.encodeRawJson(response.data)
+          ..size = utf8.encode(response.data.toString()).length;
+      }
     }
 
     httpResponse.time = DateTime.now();
@@ -182,15 +190,23 @@ class Interceptor extends InterceptorsWrapper {
 
       if (error.response!.data == null) {
         httpResponse..size = 0;
-      } else if (Helper.isBinaryData(error.response!.data)) {
-        final int byteCount = (error.response!.data as List).length;
-        httpResponse
-          ..body = '[File \u2014 $byteCount bytes]'
-          ..size = byteCount;
       } else {
-        httpResponse
-          ..body = Helper.encodeRawJson(error.response?.data)
-          ..size = utf8.encode(error.response!.data.toString()).length;
+        final decodedText = Helper.tryDecodeBytes(error.response!.data);
+        if (decodedText != null) {
+          // Bytes that decoded as UTF-8 text (e.g. JSON error from a file endpoint)
+          httpResponse
+            ..body = Helper.encodeRawJson(decodedText)
+            ..size = utf8.encode(decodedText).length;
+        } else if (Helper.isBinaryData(error.response!.data)) {
+          final int byteCount = (error.response!.data as List).length;
+          httpResponse
+            ..body = '[File \u2014 $byteCount bytes]'
+            ..size = byteCount;
+        } else {
+          httpResponse
+            ..body = Helper.encodeRawJson(error.response?.data)
+            ..size = utf8.encode(error.response!.data.toString()).length;
+        }
       }
 
       httpResponse.headers = error.response?.headers.map;
