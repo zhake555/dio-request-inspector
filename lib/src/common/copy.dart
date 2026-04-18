@@ -83,8 +83,10 @@ class Copy {
         'Bytes Received: ${Helper.formatBytes(data.response?.size ?? 0)}');
 
     activityDetails.writeln('\n--- Request ---');
+    final requestHeaders = Helper.decodeRawJson(data.request?.headers ?? '{}')
+      ..removeWhere((key, _) => key.toLowerCase() == 'authorization');
     activityDetails.writeln(
-        'Headers: ${Helper.encodeRawJson(data.request?.headers).prettify}');
+        'Headers: ${Helper.encodeRawJson(requestHeaders).prettify}');
 
     activityDetails.writeln(
         'Query Parameters: ${Helper.encodeRawJson(data.request?.queryParameters).prettify}');
@@ -97,11 +99,6 @@ class Copy {
         .writeln('Headers: ${Helper.encodeRawJson(data.response?.headers)}');
     activityDetails.writeln(
         'Body: ${isImage ? "Image Body" : data.response?.body.prettify}');
-
-    if (data.error?.error != null) {
-      activityDetails.writeln('\n--- Error ---');
-      activityDetails.writeln('Error: ${data.error?.error}');
-    }
 
     return activityDetails.toString();
   }
