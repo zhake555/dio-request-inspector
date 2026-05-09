@@ -50,14 +50,8 @@ class Interceptor extends InterceptorsWrapper {
 
     final mergedQueryParameters = <String, dynamic>{};
 
-    uri.queryParameters.forEach((key, value) {
-      if (mergedQueryParameters.containsKey(key)) {
-        mergedQueryParameters[key] = [mergedQueryParameters[key], value]
-            .expand((e) => e is List ? e : [e])
-            .toList();
-      } else {
-        mergedQueryParameters[key] = value;
-      }
+    uri.queryParametersAll.forEach((key, values) {
+      mergedQueryParameters[key] = values.length == 1 ? values.first : values;
     });
 
     options.queryParameters.forEach((key, value) {

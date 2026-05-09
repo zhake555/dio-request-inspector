@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio_request_inspector/src/common/copy_settings_storage.dart';
 import 'package:dio_request_inspector/src/common/extensions.dart';
 import 'package:dio_request_inspector/src/common/helpers.dart';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
@@ -10,7 +11,12 @@ class Copy {
 
     curlCmd.write(' -X ${call.method}');
 
-    final headers = Helper.decodeRawJson(call.request?.headers ?? '{}');
+    final settings = CopySettingsStorage.current;
+    final allHeaders = Helper.decodeRawJson(call.request?.headers ?? '{}');
+    final headers = Map<String, dynamic>.from(allHeaders)
+      ..removeWhere(
+          (key, _) => settings.excludedHeaders.contains(key.toLowerCase()));
+
     for (final MapEntry<String, dynamic> header in headers.entries) {
       final headerValue = header.value?.toString() ?? '';
       if (headerValue.isNotEmpty) {
@@ -32,19 +38,21 @@ class Copy {
     }
 
     final Map<String, dynamic>? queryParamMap = call.request?.queryParameters;
-    int paramCount = queryParamMap?.keys.length ?? 0;
     final StringBuffer queryParams = StringBuffer();
 
-    if (paramCount > 0) {
-      queryParams.write('?');
-      for (final MapEntry<String, dynamic> queryParam
-          in queryParamMap?.entries ?? []) {
-        queryParams.write('${queryParam.key}=${queryParam.value}');
-        paramCount--;
-        if (paramCount > 0) {
-          queryParams.write('&');
+    if (queryParamMap != null && queryParamMap.isNotEmpty) {
+      final parts = <String>[];
+      for (final entry in queryParamMap.entries) {
+        if (entry.value is List) {
+          for (final val in entry.value as List) {
+            parts.add('${entry.key}=$val');
+          }
+        } else {
+          parts.add('${entry.key}=${entry.value}');
         }
       }
+      queryParams.write('?');
+      queryParams.write(parts.join('&'));
     }
 
     if (call.server.contains('http://') || call.server.contains('https://')) {
@@ -67,6 +75,7 @@ class Copy {
     final isImage = contentTypeList != null &&
         contentTypeList.any((element) => element.contains('image'));
 
+    final settings = CopySettingsStorage.current;
     final StringBuffer activityDetails = StringBuffer();
 
     activityDetails.writeln('\n--- HTTP Activity ---');
@@ -83,15 +92,19 @@ class Copy {
         'Bytes Received: ${Helper.formatBytes(data.response?.size ?? 0)}');
 
     activityDetails.writeln('\n--- Request ---');
-    final requestHeaders = Helper.decodeRawJson(data.request?.headers ?? '{}')
-      ..removeWhere((key, _) => key.toLowerCase() == 'authorization');
-    final headersEncoded = Helper.encodeRawJson(requestHeaders);
-    if (headersEncoded != null && headersEncoded.isNotEmpty) {
-      activityDetails.writeln('Headers: ${headersEncoded.prettify}');
+
+    if (settings.copyRequestHeaders) {
+      final requestHeaders =
+          Helper.decodeRawJson(data.request?.headers ?? '{}')
+            ..removeWhere(
+                (key, _) => settings.excludedHeaders.contains(key.toLowerCase()));
+      final headersEncoded = Helper.encodeRawJson(requestHeaders);
+      if (headersEncoded != null && headersEncoded.isNotEmpty) {
+        activityDetails.writeln('Headers: ${headersEncoded.prettify}');
+      }
     }
 
-    final queryEncoded =
-        Helper.encodeRawJson(data.request?.queryParameters);
+    final queryEncoded = Helper.encodeRawJson(data.request?.queryParameters);
     if (queryEncoded != null && queryEncoded.isNotEmpty) {
       activityDetails.writeln('Query Parameters: ${queryEncoded.prettify}');
     }
@@ -103,10 +116,14 @@ class Copy {
 
     activityDetails.writeln('\n--- Response ---');
     activityDetails.writeln('Status Code: ${data.response?.status}');
-    final responseHeaders = Helper.encodeRawJson(data.response?.headers);
-    if (responseHeaders != null && responseHeaders.isNotEmpty) {
-      activityDetails.writeln('Headers: $responseHeaders');
+
+    if (settings.copyResponseHeaders) {
+      final responseHeaders = Helper.encodeRawJson(data.response?.headers);
+      if (responseHeaders != null && responseHeaders.isNotEmpty) {
+        activityDetails.writeln('Headers: $responseHeaders');
+      }
     }
+
     final responseBody = isImage ? 'Image Body' : data.response?.body;
     if (responseBody != null && responseBody.isNotEmpty) {
       activityDetails.writeln('Body: ${responseBody.prettify}');

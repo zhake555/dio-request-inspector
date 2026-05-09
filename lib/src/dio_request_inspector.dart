@@ -1,3 +1,4 @@
+import 'package:dio_request_inspector/src/common/copy_settings_storage.dart';
 import 'package:dio_request_inspector/src/common/storage.dart';
 import 'package:dio_request_inspector/src/interceptor.dart';
 import 'package:dio_request_inspector/src/page/dashboard/dashboard_page.dart';
@@ -31,6 +32,9 @@ class DioRequestInspector {
     this.isInspectorEnabled = isInspectorEnabled;
     this.password = password;
     this.showSummary = showSummary;
+    if (isInspectorEnabled) {
+      CopySettingsStorage.load();
+    }
   }
 
   Interceptor getDioRequestInterceptor() {

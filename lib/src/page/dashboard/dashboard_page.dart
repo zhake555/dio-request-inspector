@@ -1,3 +1,4 @@
+import 'package:dio_request_inspector/src/common/copy_settings_storage.dart';
 import 'package:dio_request_inspector/src/common/enum.dart';
 import 'package:dio_request_inspector/src/common/storage.dart';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
@@ -6,6 +7,7 @@ import 'package:dio_request_inspector/src/page/dashboard/widget/password_protect
 import 'package:dio_request_inspector/src/page/detail/detail_page.dart';
 import 'package:dio_request_inspector/src/page/resources/app_color.dart';
 import 'package:dio_request_inspector/src/page/resources/app_theme.dart';
+import 'package:dio_request_inspector/src/page/settings/copy_settings_sheet.dart';
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -33,6 +35,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
+    CopySettingsStorage.load();
   }
 
   @override
@@ -100,6 +103,20 @@ class _DashboardPageState extends State<DashboardPage> {
                 isSearch ? Icons.close : Icons.search,
                 color: AppColor.primary,
               ),
+            ),
+            IconButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                  builder: (_) => const CopySettingsSheet(),
+                );
+              },
+              icon: Icon(Icons.tune, color: AppColor.primary),
             ),
             PopupMenuButton(
               icon: Icon(
