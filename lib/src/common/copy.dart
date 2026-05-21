@@ -131,4 +131,16 @@ class Copy {
 
     return activityDetails.toString();
   }
+
+  static String getListActivity(List<HttpActivity> list) {
+    final StringBuffer buffer = StringBuffer();
+    for (int i = 0; i < list.length; i++) {
+      if (i > 0) {
+        buffer.writeln('\n========================================');
+      }
+      buffer.write(getActivity(list[i]));
+    }
+    return buffer.toString();
+  }
 }
+

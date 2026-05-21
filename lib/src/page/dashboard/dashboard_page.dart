@@ -1,5 +1,7 @@
+import 'package:dio_request_inspector/src/common/copy.dart';
 import 'package:dio_request_inspector/src/common/copy_settings_storage.dart';
 import 'package:dio_request_inspector/src/common/enum.dart';
+import 'package:dio_request_inspector/src/common/helpers.dart';
 import 'package:dio_request_inspector/src/common/storage.dart';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
 import 'package:dio_request_inspector/src/page/dashboard/widget/item_response_widget.dart';
@@ -75,6 +77,51 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  void _copyAllActivities(List<HttpActivity> activities) {
+    List<HttpActivity> displayedActivities = activities;
+
+    if (isSearch && searchController.text.isNotEmpty) {
+      final query = searchController.text.toLowerCase();
+      displayedActivities = displayedActivities
+          .where((activity) =>
+              activity.toString().toLowerCase().contains(query))
+          .toList();
+    } else {
+      displayedActivities = List.from(displayedActivities);
+    }
+
+    switch (currentSort) {
+      case SortActivity.byTime:
+        displayedActivities
+            .sort((a, b) => b.createdTime.compareTo(a.createdTime));
+        break;
+      case SortActivity.byMethod:
+        displayedActivities
+            .sort((a, b) => a.method.compareTo(b.method));
+        break;
+      case SortActivity.byStatus:
+        displayedActivities.sort((a, b) => (a.response?.status ?? 0)
+            .compareTo(b.response?.status ?? 0));
+        break;
+    }
+
+    if (displayedActivities.isEmpty) {
+      Helper.copyToClipboard(
+        context: context,
+        text: '',
+        message: 'No activities to copy',
+      );
+      return;
+    }
+
+    final copiedText = Copy.getListActivity(displayedActivities);
+    Helper.copyToClipboard(
+      context: context,
+      text: copiedText,
+      message: 'All activities copied to clipboard',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -103,6 +150,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 isSearch ? Icons.close : Icons.search,
                 color: AppColor.primary,
               ),
+            ),
+            IconButton(
+              onPressed: () {
+                _copyAllActivities(widget.storage.activitiesNotifier.value);
+              },
+              icon: Icon(Icons.copy, color: AppColor.primary),
             ),
             IconButton(
               onPressed: () {
