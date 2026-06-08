@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio_request_inspector/src/common/copy.dart';
 import 'package:dio_request_inspector/src/common/extensions.dart';
 import 'package:dio_request_inspector/src/common/helpers.dart';
+import 'package:dio_request_inspector/src/common/http_version.dart';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
 import 'package:dio_request_inspector/src/page/detail/widgets/item_column.dart';
 import 'package:dio_request_inspector/src/page/detail/widgets/item_row.dart';
@@ -244,6 +245,13 @@ class _DetailPageState extends State<DetailPage>
                   ItemRow(
                       name: 'Status Code:',
                       value: data.response?.status.toString()),
+                  if (HttpVersion.formatHttpVersion(
+                          data.response?.httpVersion) !=
+                      null)
+                    ItemRow(
+                        name: 'HTTP Version:',
+                        value: HttpVersion.formatHttpVersion(
+                            data.response?.httpVersion)),
                   ItemRow(
                       name: 'Bytes Received:',
                       value: Helper.formatBytes(data.response?.size ?? 0)),

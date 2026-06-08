@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio_request_inspector/src/common/copy_settings_storage.dart';
 import 'package:dio_request_inspector/src/common/extensions.dart';
 import 'package:dio_request_inspector/src/common/helpers.dart';
+import 'package:dio_request_inspector/src/common/http_version.dart';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
 
 class Copy {
@@ -116,6 +117,11 @@ class Copy {
 
     activityDetails.writeln('\n--- Response ---');
     activityDetails.writeln('Status Code: ${data.response?.status}');
+
+    final httpVersion = HttpVersion.formatHttpVersion(data.response?.httpVersion);
+    if (httpVersion != null) {
+      activityDetails.writeln('HTTP Version: $httpVersion');
+    }
 
     if (settings.copyResponseHeaders) {
       final responseHeaders = Helper.encodeRawJson(data.response?.headers);

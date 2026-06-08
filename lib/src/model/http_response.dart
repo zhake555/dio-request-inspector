@@ -4,4 +4,5 @@ class HttpResponse {
   DateTime time = DateTime.now();
   String? body;
   Map<String, List<String>>? headers;
+  String? httpVersion;
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:dio_request_inspector/src/common/helpers.dart';
+import 'package:dio_request_inspector/src/common/http_version.dart';
 import 'package:dio_request_inspector/src/common/storage.dart';
 import 'package:dio_request_inspector/src/model/form_data.dart';
 import 'package:dio_request_inspector/src/model/http_activity.dart';
@@ -156,6 +157,7 @@ class Interceptor extends InterceptorsWrapper {
 
     httpResponse.time = DateTime.now();
     httpResponse.headers = response.headers.map;
+    httpResponse.httpVersion = HttpVersion.resolve(response);
 
     storage.addResponse(httpResponse, response.requestOptions.hashCode);
     handler.next(response);
@@ -204,6 +206,7 @@ class Interceptor extends InterceptorsWrapper {
       }
 
       httpResponse.headers = error.response?.headers.map;
+      httpResponse.httpVersion = HttpVersion.resolve(error.response!);
       storage.addResponse(
         httpResponse,
         error.response!.requestOptions.hashCode,

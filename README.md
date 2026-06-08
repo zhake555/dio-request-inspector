@@ -66,6 +66,102 @@ dio.interceptors.add(inspector.getDioRequestInterceptor());
 
 see detail example
 
+## HTTP version
+
+The detail screen shows the negotiated **HTTP Version** (e.g. `HTTP/1.1`, `HTTP/2`,
+`HTTP/3`) whenever it can be determined. The row is hidden when the protocol is
+unknown.
+
+Where the value comes from, per platform:
+
+| Platform / adapter | Source | Result |
+| --- | --- | --- |
+| Default `IOHttpClientAdapter` (Android/iOS/desktop) | dio sets `Response.extra['httpVersion']` | `HTTP/1.0` or `HTTP/1.1` |
+| Web (`BrowserHttpClientAdapter`) | `PerformanceResourceTiming.nextHopProtocol` | `HTTP/1.1`, `HTTP/2`, `HTTP/3` |
+| `cronet_http` / `cupertino_http` (native) | a bridge writes the protocol into `Response.extra` | `HTTP/2`, `HTTP/3` |
+
+> On the web the protocol is read from the Resource Timing API. For cross-origin
+> responses the server must send the `Timing-Allow-Origin` header, otherwise the
+> browser hides `nextHopProtocol` and the row is omitted.
+
+### Showing HTTP/2 and HTTP/3 with native clients
+
+`cronet_http` (Android) and `cupertino_http` (iOS/macOS) negotiate HTTP/2 and
+HTTP/3, but dio reaches them through a `package:http` bridge that does not fill
+`Response.extra`. The inspector reads the protocol from
+`extra['httpVersion']`, `extra['negotiatedProtocol']` or `extra['protocol']` —
+so a small adapter that forwards the negotiated protocol is all that is needed:
+
+```dart
+import 'dart:async';
+import 'dart:typed_data';
+
+import 'package:cronet_http/cronet_http.dart';
+import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+
+/// Routes Dio requests through a `package:http` [client] (cronet/cupertino) and
+/// forwards the negotiated protocol into `ResponseBody.extra`, where
+/// dio_request_inspector picks it up.
+class NativeHttpVersionAdapter implements HttpClientAdapter {
+  NativeHttpVersionAdapter(this.client);
+
+  final http.Client client;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    final request = http.StreamedRequest(options.method, options.uri)
+      ..followRedirects = options.followRedirects
+      ..maxRedirects = options.maxRedirects;
+    options.headers.forEach((k, v) => request.headers[k] = '$v');
+
+    if (requestStream != null) {
+      unawaited(request.sink.addStream(requestStream).then((_) {
+        request.sink.close();
+      }));
+    } else {
+      unawaited(request.sink.close());
+    }
+
+    final response = await client.send(request);
+
+    final body = ResponseBody(
+      response.stream.cast<Uint8List>(),
+      response.statusCode,
+      statusMessage: response.reasonPhrase,
+      isRedirect: response.isRedirect,
+      headers: response.headers.map((k, v) => MapEntry(k, [v])),
+    );
+
+    // cronet exposes the negotiated protocol (e.g. `h2`, `h3`, `http/1.1`).
+    if (response is CronetStreamedResponse &&
+        response.negotiatedProtocol.isNotEmpty) {
+      body.extra['negotiatedProtocol'] = response.negotiatedProtocol;
+    }
+    return body;
+  }
+
+  @override
+  void close({bool force = false}) => client.close();
+}
+```
+
+Wire it up:
+
+```dart
+final dio = Dio()
+  ..httpClientAdapter = NativeHttpVersionAdapter(CronetClient.defaultCronet())
+  ..interceptors.add(inspector.getDioRequestInterceptor());
+```
+
+> `cupertino_http` does not expose the negotiated protocol through its public
+> API, so on iOS use the default `IOHttpClientAdapter` (reports `HTTP/1.1`) if
+> you need the version shown.
+
 ## Note
 
 - tap ```Long press``` on your screen to show DioRequestInspector UI
