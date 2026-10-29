@@ -1,4 +1,11 @@
 
+## 3.2.8
+
+* feat: show negotiated HTTP version (`HTTP/1.1`, `HTTP/2`, `HTTP/3`) in request detail and copied activity
+* feat: resolve HTTP version on web via `PerformanceResourceTiming.nextHopProtocol`
+* feat: read HTTP version from `extra` (`httpVersion`/`negotiatedProtocol`/`protocol`) so native adapters (cronet/cupertino) can surface HTTP/2 & HTTP/3
+* chore: bump min Dart SDK to 3.6.0, add `web` dependency
+
 ## 3.2.0
 
 * chore: update dio to ^5.8.0+1
